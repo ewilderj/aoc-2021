@@ -1,0 +1,7 @@
+[package]
+name = "day01"
+version = "0.1.0"
+authors = ["Edd Wilder-James <edd@me.com>"]
+edition = "2021"
+
+[dependencies]
