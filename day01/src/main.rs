@@ -24,4 +24,14 @@ fn main() {
     );
 
     println!("part2: {}", r2);
+
+    //  more efficient version of part2, as 2 items are in common
+    //  over sliding 3-tuples and don't need to be considered
+    let r3 = i
+        .clone()
+        .tuple_windows::<(_, _, _, _)>()
+        .filter(|(a, _, _, d)| a < d)
+        .count();
+
+    println!("part2': {}", r3);
 }
