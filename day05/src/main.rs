@@ -1,6 +1,4 @@
 use std::collections::HashMap;
-use num::signum;
-
 type Board = HashMap<(i32, i32), u32>;
 
 fn parse_coords(s: &str) -> (i32, i32) {
@@ -12,7 +10,7 @@ fn draw(b: &mut Board, (x0, y0): (i32, i32), (x1, y1): (i32, i32), no_d: bool) {
     if no_d && x0 != x1 && y0 != y1 {
         return;
     } else {
-        let (dx, dy) = (signum(x1-x0), signum(y1-y0));
+        let (dx, dy) = ((x1-x0).signum(), (y1-y0).signum());
         let (mut x, mut y) = (x0, y0);
 
         while x != (x1 + dx) || y != (y1 + dy) {
