@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use num::signum;
 
-type Board = HashMap<(i32, i32), i32>;
+type Board = HashMap<(i32, i32), u32>;
 
 fn parse_coords(s: &str) -> (i32, i32) {
     let (xs, ys) = s.split_once(",").unwrap();
