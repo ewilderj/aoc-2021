@@ -1,67 +1,39 @@
 use std::collections::HashMap;
+use num::signum;
+
+type Board = HashMap<(i32, i32), i32>;
 
 fn parse_coords(s: &str) -> (i32, i32) {
     let (xs, ys) = s.split_once(",").unwrap();
     return (xs.parse::<i32>().unwrap(), ys.parse::<i32>().unwrap());
 }
 
-fn find_dir(a: i32, b:i32) -> i32 {
-    if a < b { 1 } else if a > b { -1 } else { 0 }
-}
-
-fn draw(b: &mut HashMap<(i32, i32), i32>, f: &str, t: &str, diag: bool) {
-    let (x0, y0) = parse_coords(f);
-    let (x1, y1) = parse_coords(t);
-
-    if x0 != x1 && y0 != y1 && !diag {
-        // diagonal, so skip
+fn draw(b: &mut Board, (x0, y0): (i32, i32), (x1, y1): (i32, i32), no_d: bool) {
+    if no_d && x0 != x1 && y0 != y1 {
+        return;
     } else {
-        let (dx, dy) = (find_dir(x0, x1), find_dir(y0, y1));
+        let (dx, dy) = (signum(x1-x0), signum(y1-y0));
         let (mut x, mut y) = (x0, y0);
-        // println!("from {} to {} dx {} dy {}", f, t, dx, dy);
-        while (x != x1 || y != y1)  {
-            b.entry((x, y)).and_modify(|v| { *v += 1}).or_insert(1);
-            x = x + dx;
-            y = y + dy;
-        }
-        b.entry((x, y)).and_modify(|v| { *v += 1}).or_insert(1);
-    }
-}
 
-fn dump_board(b: &HashMap<(i32, i32), i32>, w: i32, h: i32) {
-    for y in 0..=h {
-        for x in 0..=w {
-            if let Some(m) = b.get(&(x,y)) {
-                print!("{}", m);
-            } else {
-                print!(".");
-            }
+        while x != (x1 + dx) || y != (y1 + dy) {
+            b.entry((x, y)).and_modify(|v| *v += 1).or_insert(1);
+            x += dx;
+            y += dy;
         }
-        print!("\n");
     }
 }
 
 fn main() {
-    let l = include_str!("../input.txt").lines();
+    let (mut board1, mut board2) = (Board::new(), Board::new());
 
-    let mut board = HashMap::<(i32, i32), i32>::new();
-
-    for s in l.clone() {
-          let (from, to) = s.split_once(" -> ").unwrap();
-          draw(&mut board, &from, &to, false);
+    for s in include_str!("../input.txt").lines() {
+        let (a, b) = s.split_once(" -> ").unwrap();
+        let (f, t) = (parse_coords(a), parse_coords(b));
+        draw(&mut board1, f, t, true);
+        draw(&mut board2, f, t, false);
     }
-    let part1 = board.values().filter(|v| **v > 1).count();
+    let part1 = board1.values().filter(|v| **v > 1).count();
+    let part2 = board2.values().filter(|v| **v > 1).count();
 
-    println!("part1: {}", part1);
-
-    let mut board = HashMap::<(i32, i32), i32>::new();
-    for s in l.clone() {
-          let (from, to) = s.split_once(" -> ").unwrap();
-          draw(&mut board, &from, &to, true);
-    }
-    let part2 = board.values().filter(|v| **v > 1).count();
-    // dump_board(&board, 9, 9);
-    println!("part2: {}", part2);
-
-
+    println!("part1: {}\npart2: {}", part1, part2);
 }
