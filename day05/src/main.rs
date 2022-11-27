@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+
 type Board = HashMap<(i32, i32), u32>;
 
 fn parse_coords(s: &str) -> (i32, i32) {

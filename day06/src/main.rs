@@ -1,16 +1,16 @@
-
 fn main() {
-    let mut fish: Vec<u32> = include_str!("../input.txt")
+    let mut fish: Vec<u64> = include_str!("../input.txt")
         .lines()
         .next()
         .unwrap()
         .split(",")
-        .map(|s| s.parse::<u32>().unwrap())
+        .map(|s| s.parse::<u64>().unwrap())
         .collect();
 
-    let mut fish2 = VecDeque::from(fish.clone());
+    // make an untouched copy for part 2
+    let mut fish2 = Vec::from(fish.clone());
 
-    // brute force for part1, but we'll need to find
+    // brute force simulation for part1, but we'll need to find
     // something smart for part2
     for d in 0..80 {
         for i in 0..fish.len() {
@@ -24,37 +24,32 @@ fn main() {
     }
     println!("part1: {}", fish.len());
 
-    const TOTAL_DAYS: u32 = 256;
-    const PERIOD: u32 = 7;
+    // let's move our focus to how many fish are spawned each day
+    // we can then sum that to find how many fish exist in total
+    const DAYS: usize = 256;
 
-    fn will_spawn_on(days_before_spawn: u32) -> VecDeque<u32> {
-        if (days_before_spawn >= TOTAL_DAYS) {
-            return VecDeque::new();
-        } else {
-            let n = (TOTAL_DAYS - days_before_spawn - 1) / PERIOD + 1;
-            return (0..n).map(|i| 9 + days_before_spawn + i * PERIOD).collect();
-        }
+    let mut fishies: [u64; DAYS + 9] =  [0; DAYS + 9];
+
+    // for the initial fish, record their projected spawn
+    for f in fish2.iter () {
+        fishies[*f as usize] += 1;
     }
 
-    let mut t = fish2.len();
-    println!("starting with {} fish", t);
-    loop {
-        if fish2.len() == 0 {
-            println!("t {}", t);
-            break;
-        }
-        let i = fish2.pop_front().unwrap();
-        let mut d: VecDeque<u32> = will_spawn_on(i);
-        let n = d.len();
-        t = t + n;
-        // println!("++ {:?}", d);
-        if n > 0 { fish2.append(&mut d); }
-        // println!("({}) {} -> n {} {:?}", t, i, n, fish2);
-
+    for d in 0..DAYS {
+        // fishies[d] fish are born today! hooray!
+        //
+        // everyone alive today will spawn in 7 days time
+        fishies[d + 7] += fishies[d];
+        // every newly-spawned fish today will spawn in 9 days time
+        fishies[d + 9] += fishies[d];
     }
-    // assume 1 fish, on day 0 initially
-    //
-    // day1: (daysT - daysI) / 7 = number of 1st gen spawns
-    // daysP = daysT-daysI
-    // first spawner will have: (daysP - 9) / 7 = 2nd gen spawns
+
+    // answer is newly alive fish, plus the initial population
+    let t = fish2.len() as u64 + &fishies[0..DAYS].iter().sum::<u64>();
+    println!("part2: {}", t);
+
+    // check out https://github.com/timvisee/advent-of-code-2021/blob/master/day06b/src/
+    // for a solution that realizes this can all be done with modulo 9 arithmetic
+    // disclaimer: I only solved this efficiently after looking at Tim's ideas.
+    // Life is short, and you have to keep this fun!
 }
